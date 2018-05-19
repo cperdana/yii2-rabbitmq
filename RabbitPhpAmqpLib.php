@@ -37,7 +37,7 @@ class RabbitPhpAmqpLib
 
     public function rabbit_send($themsg)
     {
-        $channel = $this->getParam('send');
+        $channel = $this->getChannel('send');
 
         $messageBody = $themsg;
         $message = new AMQPMessage($messageBody, array('content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
@@ -54,7 +54,7 @@ class RabbitPhpAmqpLib
         }    
     }
 
-    private function getParam($forReadOrSend){
+    private function getChannel($forReadOrSend){
         define('HOST',  '127.0.0.1');
         define('PORT', 5672);
         define('USER', 'guest');
@@ -65,19 +65,23 @@ class RabbitPhpAmqpLib
         define('AMQP_DEBUG', false);
 
 
-        $this->connection = new AMQPStreamConnection(HOST, PORT, USER, PASS, VHOST);
+        $this->connection = new AMQPStreamConnection(
+                    $this->host, $this->port, $this->user, $this->pass, $this->vhost);
         $channel = $this->connection->channel();
 
 
         if ($forReadOrSend == 'read'){
-            $this->readQueue = \Yii::$app->params['rabbitReadQueueName'];
+            $this->readQueue = $this->readQueueName;
             $channel->queue_declare($this->readQueue, false, true, false, false);
         
         }else if($forReadOrSend == 'send'){
 
-            $this->exchange = \Yii::$app->params['rabbitSendExchangeName'];
-            $exchangeType = \Yii::$app->params['rabbitSendExchangeType'];
-            $this->sendQueue = \Yii::$app->params['rabbitSendQueueName'];
+            // $this->exchange = \Yii::$app->params['rabbitSendExchangeName'];
+            // $exchangeType = \Yii::$app->params['rabbitSendExchangeType'];
+            // $this->sendQueue = \Yii::$app->params['rabbitSendQueueName'];
+            $this->exchange = $this->sendExchangeName;
+            $exchangeType = $this->sendExchangeType;
+            $this->sendQueue = $this->sendQueueName;
 
             /*
                 name: $queue
@@ -106,7 +110,7 @@ class RabbitPhpAmqpLib
 
     public function rabbit_read($callback)
     {
-        $channel = $this->getParam('read');
+        $channel = $this->getChannel('read');
 
 
         /*
