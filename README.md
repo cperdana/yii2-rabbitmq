@@ -12,18 +12,18 @@ to the require section of your composer.json file.
 add component in config file
 ```
 'rabbit' => [
-    'class' => 'cperdana\rabbitmq\RabbitPhpAmqpLib',
-    'host' => '127.0.0.1',
-    'amqpPort' => 5666,
-    'login' => 'user_login',
-    'pass' => 'user_pass',
-    'vhost' => '/',
+	'class' => 'cperdana\rabbitmq\RabbitPhpAmqpLib',
+	'host' => '127.0.0.1',
+	'amqpPort' => 5666,
+	'login' => 'user_login',
+	'pass' => 'user_pass',
+	'vhost' => '/',
 	'readQueueName' => 'read_queue',
 
 	'sendExchangeName' => 'exchange_name',
 	'sendExchangeType' => 'fanout', // fanout/direct
 	'sendQueueName' => 'send_queue'
- ],
+],
 ```
 
 add console command
