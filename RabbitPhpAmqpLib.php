@@ -6,34 +6,71 @@ use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
+
+
+// If this is enabled you can see AMQP output on the CLI
+defined('AMQP_DEBUG') or define('AMQP_DEBUG', false);
+
+
 /**
  * Class Rabbit
  * @package cperdana\rabbitmq
  */
 class RabbitPhpAmqpLib
 {
-    
+    /**
+     * @var string Server IP
+     */
     public $host = '127.0.0.1';
+
+    /**
+     * @var int AMQP port
+     */
     public $port = '5672';
+
+    /**
+     * @var string Login
+     */
     public $user = 'guest';
+
+    /**
+     * @var string Password
+     */
     public $pass = 'guest';
+
+    /**
+     * @var string Virtual host
+     */
     public $vhost = '/';
+
+
     public $debug = false;
 
-    public $sendExchangeName = 'cmerp.wgl.wgm';
-    public $sendExchangeType = 'fanout';   // fanout/direct
-    public $sendQueueName = 'wg_manager';
+    /**
+     * @var string ExchangeName to Send
+     */
+    public $sendExchangeName = 'exchange_name';
+    /**
+     * @var string Exchange type to Send
+     */
+    public $sendExchangeType = 'exchange_type';   // fanout/direct
+    /**
+     * @var string Queue name to send (to be bind with $sendExchangeName)
+     */
+    public $sendQueueName = 'send_queue_name';
 
-    public $readQueueName = 'wg_manager';
+
+    /**  
+     *@var string queue name to Read
+    */
+    public $readQueueName = 'read_queue_name';
 
 
-    private $exchange;
-    private $sendQueue;
-    private $readQueue;
+
+    // private $exchange;
+    // private $sendQueue;
+    // private $readQueue;
     private $connection;
-
-
-
 
     public function rabbit_send($themsg)
     {
@@ -41,7 +78,7 @@ class RabbitPhpAmqpLib
 
         $messageBody = $themsg;
         $message = new AMQPMessage($messageBody, array('content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
-        $channel->basic_publish($message, $this->exchange);
+        $channel->basic_publish($message, $this->sendExchangeName);
         $channel->close();
         $this->connection->close();
     }
@@ -55,15 +92,6 @@ class RabbitPhpAmqpLib
     }
 
     private function getChannel($forReadOrSend){
-        define('HOST',  '127.0.0.1');
-        define('PORT', 5672);
-        define('USER', 'guest');
-        define('PASS', 'guest');
-        define('VHOST', '/');
-
-         //If this is enabled you can see AMQP output on the CLI
-        define('AMQP_DEBUG', false);
-
 
         $this->connection = new AMQPStreamConnection(
                     $this->host, $this->port, $this->user, $this->pass, $this->vhost);
@@ -71,17 +99,14 @@ class RabbitPhpAmqpLib
 
 
         if ($forReadOrSend == 'read'){
-            $this->readQueue = $this->readQueueName;
-            $channel->queue_declare($this->readQueue, false, true, false, false);
+            // $this->readQueue = $this->readQueueName;
+            $channel->queue_declare($this->readQueueName, false, true, false, false);
         
         }else if($forReadOrSend == 'send'){
 
-            // $this->exchange = \Yii::$app->params['rabbitSendExchangeName'];
-            // $exchangeType = \Yii::$app->params['rabbitSendExchangeType'];
-            // $this->sendQueue = \Yii::$app->params['rabbitSendQueueName'];
-            $this->exchange = $this->sendExchangeName;
-            $exchangeType = $this->sendExchangeType;
-            $this->sendQueue = $this->sendQueueName;
+            // $this->exchange = $this->sendExchangeName;
+            // $exchangeType = $this->sendExchangeType;
+            // $this->sendQueue = $this->sendQueueName;
 
             /*
                 name: $queue
@@ -90,7 +115,7 @@ class RabbitPhpAmqpLib
                 exclusive: false // the queue can be accessed in other channels
                 auto_delete: false //the queue won't be deleted once the channel is closed.
             */
-            $channel->queue_declare($this->sendQueue, false, true, false, false);
+            $channel->queue_declare($this->sendQueueName, false, true, false, false);
             /*
                 name: $exchange
                 type: direct
@@ -98,8 +123,8 @@ class RabbitPhpAmqpLib
                 durable: true // the exchange will survive server restarts
                 auto_delete: false //the exchange won't be deleted once the channel is closed.
             */
-            $channel->exchange_declare($this->exchange, $exchangeType, false, true, false);
-            $channel->queue_bind($this->sendQueue, $this->exchange);
+            $channel->exchange_declare($this->sendExchangeName, $this->sendExchangeType, false, true, false);
+            $channel->queue_bind($this->sendQueueName, $this->sendExchangeName);
 
         }
 
@@ -123,7 +148,7 @@ class RabbitPhpAmqpLib
             callback: A PHP Callback
         */
         $consumerTag = 'consumer';
-        $channel->basic_consume($this->readQueue, $consumerTag, false, false, false, false, $callback);
+        $channel->basic_consume($this->readQueueName, $consumerTag, false, false, false, false, $callback);
 
 
         // Loop as long as the channel has callbacks registered
