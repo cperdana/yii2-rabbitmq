@@ -37,12 +37,12 @@ class MsgqueController extends \yii\console\Controller
         echo $message->body;
     
         $rabbit = \Yii::$app->rabbit;
-        $rabbit->rabbit_sendAck($message);    
+        $rabbit->sendAck($message);    
     }
 
     public function actionSend($themsg){
         $rabbit = \Yii::$app->rabbit;
-        $rabbit->rabbit_send($themsg);
+        $rabbit->send($themsg);
     }
 
     public function actionRead(){
@@ -52,7 +52,7 @@ class MsgqueController extends \yii\console\Controller
         };
 
         $rabbit = \Yii::$app->rabbit;
-        $rabbit->rabbit_read($callback);
+        $rabbit->read($callback);
     }
 }
 ```
