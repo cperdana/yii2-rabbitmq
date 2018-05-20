@@ -69,7 +69,7 @@ class RabbitPhpAmqpLib
 
     private $connection;
 
-    public function rabbit_send($themsg)
+    public function send($themsg)
     {
         $channel = $this->getChannel('send');
 
@@ -80,7 +80,7 @@ class RabbitPhpAmqpLib
         $this->connection->close();
     }
 
-    public function rabbit_sendAck($message){
+    public function sendAck($message){
         $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
         // Send a message with the string "quit" to cancel the consumer.
         if ($message->body === 'quit') {
@@ -130,7 +130,7 @@ class RabbitPhpAmqpLib
     }
 
 
-    public function rabbit_read($callback)
+    public function read($callback)
     {
         $channel = $this->getChannel('read');
 
