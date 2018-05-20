@@ -14,8 +14,8 @@ add component in config file
 'rabbit' => [
 	'class' => 'cperdana\rabbitmq\RabbitPhpAmqpLib',
 	'host' => '127.0.0.1',
-	'amqpPort' => 5666,
-	'login' => 'user_login',
+	'port' => 5666,
+	'user' => 'user_login',
 	'pass' => 'user_pass',
 	'vhost' => '/',
 	'readQueueName' => 'read_queue',
@@ -31,7 +31,7 @@ add console command
 use PhpAmqpLib\Message\AMQPMessage;
 use cperdana\rabbitmq\RabbitPhpAmqpLib;
 
-class TestController extends \yii\console\Controller
+class MsgqueController extends \yii\console\Controller
 {
     private function execute($message){
         echo $message->body;
@@ -55,4 +55,14 @@ class TestController extends \yii\console\Controller
         $rabbit->rabbit_read($callback);
     }
 }
+```
+
+as consumer
+```
+php yii msgque/read
+```
+
+as publisher
+```
+php yii msgque/send "this is the message to sent to rabbitmq"
 ```

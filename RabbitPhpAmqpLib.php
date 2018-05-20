@@ -67,9 +67,6 @@ class RabbitPhpAmqpLib
 
 
 
-    // private $exchange;
-    // private $sendQueue;
-    // private $readQueue;
     private $connection;
 
     public function rabbit_send($themsg)
